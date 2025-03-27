@@ -105,7 +105,8 @@ Commonly not a "designed experiment" analysis, but an exploratory relationship a
 #install.packages("ggcorrplot")
 #install.packages("factoextra")
 #install.packages("ggpmisc")
-
+install.packages("dplyr")
+library(dplyr)
 library(tidyverse)
 #install.packages("ggpubr")
 library(ggpubr)
@@ -395,7 +396,8 @@ Some analysis do the normalization for you (like PCA), and others don't (like k-
 Since both PCA and k-means only take numerical variables, let's select them now.
 
 ```{r selecting only numerical vars}
-weather_n 
+weather_n <- weather%>%
+  dplyr::select(-year, -site, -strength_gtex)
 
 weather_n
 ```
