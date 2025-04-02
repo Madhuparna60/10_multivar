@@ -1,6 +1,6 @@
 ---
 title: "Assignment 9 - K-means"
-author: "YOUR NAME HERE"  
+author: "Madhuparna Deb"  
 format:
   html:
     code-fold: true 
@@ -52,6 +52,123 @@ Rename this file to `Assignment-09-kmeans-LASTNAME.html`.
 For ex., mine would be `Assignment-09-kmeans-Bastos.html`.
 
 Submit your work by uploading the **html** file to **eLC Assignment #9 - K-means** by April 3rd 11:59 pm.  
+
+#Setup
+```{r}
+#install.packages("ggcorrplot")
+#install.packages("factoextra")
+#install.packages("ggpmisc")
+install.packages("dplyr")
+
+#library(tidyverse)
+#library(ggcorrplot)
+#library(broom)
+#library(car)
+#library(factoextra)
+#library(ggpmisc)
+library(dplyr)
+```
+```{r}
+weather <- read_csv("../Data/weather_monthsum.csv")
+
+weather
+```
+```{r}
+weather_n <- weather %>%
+  dplyr::select(-c(year:strength_gtex))
+
+weather_n
+```
+
+```{r}
+knitr::include_graphics("https://miro.medium.com/max/960/1*KrcZK0xYgTa4qFrVr0fO2w.gif")
+
+```
+```{r}
+knitr::include_graphics("https://miro.medium.com/max/1400/1*oNt9G9UpVhtyFLDBwEMf8Q.png")
+```
+#Data normalization
+```{r}
+weather_norm <- weather_n %>%
+  
+mutate(across(everything(), ~scale(.x)))
+weather_norm
+```
+```{r kmeans model}
+mod_km <- kmeans(weather_norm,
+                 centers = 8,
+                 nstart = 10
+                 )
+
+mod_km
+```
+
+```{r choosing k - total error}
+
+# Total error x k
+fviz_nbclust(weather_norm,
+             method = "wss",
+             k.max = 10,
+             FUNcluster = kmeans)
+```
+
+```{r k silhoutte}
+# Silhouette width
+fviz_nbclust(weather_norm, 
+             method = "s",
+             k.max = 10,
+             FUNcluster = kmeans) 
+```
+
+```{r kmeans mod_km4}
+mod_km6 <- kmeans(weather_norm,
+                  centers = 6,
+                  nstart = 10
+                  )
+
+mod_km6
+```
+#observation per cluster
+```{r}
+weather%>%
+  mutate(cluster = mod_km6$cluster)
+```
+
+```{r Cluster x variable boxplot}
+weather %>%
+  mutate(cluster = mod_km6$cluster,
+         cluster = factor(cluster)) %>%
+  pivot_longer(!c(year,site,cluster)) %>%
+  ggplot(aes(x = cluster, 
+             y = value, 
+             color = cluster))+
+    geom_boxplot(show.legend = F)+
+  facet_wrap(~name, scales = "free_y", ncol = 6)
+
+ggsave("../output/clustervalidation.png",
+       width = 10,
+       height = 20)  
+
+```
+
+```{r}
+fviz_cluster(mod_km6,
+             data = weather_norm
+             )
+```
+```{r}
+# Compare the cluster assignments between the new and class models
+table(mod_km6$cluster, mod_km4$cluster)  
+```
+
+
+
+
+
+
+
+
+
   
 
 
